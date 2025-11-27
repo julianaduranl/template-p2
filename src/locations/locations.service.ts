@@ -18,7 +18,7 @@ export class LocationsService {
     async create(dto: CreateLocationDto) {
       const { ownerid, ...data } = dto;
   
-      const owner = await this.locationRepository.findOne({
+      const owner = await this.characterRepository.findOne({
         where: { id: ownerid },
       });
       if (!owner) {
