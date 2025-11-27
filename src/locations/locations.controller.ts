@@ -1,34 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
+import { TokenGuard } from 'src/auth/guards/api-token.guards';
+import { ApiHeader } from '@nestjs/swagger';
 
-@Controller('locations')
+@UseGuards(TokenGuard)
+@ApiHeader({
+  name: 'api-token',
+  description: 'Token de acceso devuelto por POST /api-token (campo "token")',
+  required: true,
+})
+@Controller('location')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
   @Post()
-  create(@Body() createLocationDto: CreateLocationDto) {
-    return this.locationsService.create(createLocationDto);
+  create(@Body() dto: CreateLocationDto) {
+    return this.locationsService.create(dto);
   }
 
   @Get()
   findAll() {
     return this.locationsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.locationsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-    return this.locationsService.update(+id, updateLocationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.locationsService.remove(+id);
   }
 }

@@ -1,6 +1,17 @@
-import { IsNumber, IsString } from 'class-validator';
-import { Character } from 'src/characters/entities/character.entity';
+import { IsNumber, IsString, Min, MinLength, IsUUID } from 'class-validator';
 
 export class CreateLocationDto {
-  ownerid: string;
+  @IsString()
+  @MinLength(2)
+  name: string;
+
+  @IsString()
+  type: string;
+
+  @IsNumber()
+  @Min(0)
+  cost: number;
+
+  @IsUUID()
+  ownerId: string;
 }

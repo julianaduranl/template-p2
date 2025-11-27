@@ -1,12 +1,16 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity()
 export class ApiToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column('text', { unique: true })
+
+  @Column({ type: 'text', unique: true })
   token: string;
-  @Column('boolean', { default: true })
-  isActive: boolean;
-  @Column('number', { default: 10 })
-  reqleft: number;
+
+  @Column({ type: 'boolean', default: true })
+  active: boolean;
+
+  @Column({ type: 'int', default: 10 })
+  reqLeft: number;
 }

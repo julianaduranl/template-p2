@@ -1,19 +1,31 @@
-import { Column, ManyToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Location } from 'src/locations/entities/location.entity';
-import { JoinTable } from 'typeorm/browser';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  JoinTable,
+} from 'typeorm';
+import { Location } from '../../locations/entities/location.entity';
+
+@Entity()
 export class Character {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
   @Column('text')
   name: string;
-  @Column('number')
+
+  @Column('float')
   salary: number;
-  @Column('boolean', { default: true })
+
+  @Column({ type: 'boolean', default: false })
   employee: boolean;
-  owner: Character;
-  @OneToOne(() => Location, (location) => location.owner, { cascade: true })
+
+  @OneToOne(() => Location, (location) => location.owner)
   property: Location;
-  @ManyToMany(() => Location, { cascade: true })
+
+  @ManyToMany(() => Location, (location) => location.favoriteVisitors)
   @JoinTable()
-  favPlaces: Location[];
+  favorites: Location[];
 }

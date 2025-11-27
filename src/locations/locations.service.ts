@@ -1,51 +1,51 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Character } from 'src/characters/entities/character.entity';
 import { Repository } from 'typeorm';
-import { CreateCharacterDto } from 'src/characters/dto/create-character.dto';
+import { Location } from './entities/location.entity';
+import { Character } from '../characters/entities/character.entity';
 
 @Injectable()
 export class LocationsService {
   constructor(
-      @InjectRepository(Character)
-      private readonly characterRepository: Repository<Character>,
-      @InjectRepository(Location)
-      private readonly locationRepository: Repository<Location>,
-    ) {}
-  
-    async create(dto: CreateLocationDto) {
-      const { ownerid, ...data } = dto;
-  
-      const owner = await this.characterRepository.findOne({
-        where: { id: ownerid },
-      });
-      if (!owner) {
-        throw new NotFoundException('Owner not found');
-      }
-  
-      const char = this.characterRepository.create({ ...data, owner });
-  
-      return await this.characterRepository.save(char);
+    @InjectRepository(Location)
+    private readonly locationRepo: Repository<Location>,
+    @InjectRepository(Character)
+    private readonly characterRepo: Repository<Character>,
+  ) {}
+
+  async create(dto: CreateLocationDto) {
+    const owner = await this.characterRepo.findOne({
+      where: { id: dto.ownerId },
+      relations: ['property'],
+    });
+
+    if (!owner) {
+      throw new NotFoundException(`Owner ${dto.ownerId} not found`);
     }
-  
-    findAll() {
-      return this.characterRepository.find({
-        relations: ['property', 'favPlaces'],
-      });
+
+    if (owner.property) {
+      throw new BadRequestException('Owner already has a property');
     }
-  
-    async findOne(id: string) {
-      const character = await this.characterRepository.findOne({
-        where: { id },
-        relations: ['property', 'favPlaces'],
-      });
-  
-      if (!character) {
-        throw new NotFoundException();
-      }
-  
-      return character;
-    }
+
+    const location = this.locationRepo.create({
+      name: dto.name,
+      type: dto.type,
+      cost: dto.cost,
+      owner,
+    });
+
+    const saved = await this.locationRepo.save(location);
+    return saved;
+  }
+
+  findAll() {
+    return this.locationRepo.find({
+      relations: ['owner', 'favoriteVisitors'],
+    });
+  }
 }
